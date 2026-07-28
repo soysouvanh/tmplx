@@ -3,7 +3,9 @@ name = "tmplx-test"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
+description = "Integration test suite for the Tmplx framework."
 license.workspace = true
+repository.workspace = true
 publish = false
 
 [dependencies]
