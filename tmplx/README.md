@@ -1,4 +1,4 @@
-# Tmplx: High-Performance HTML Template Engine
+# Tmplx: High-performance HTML template engine
 
 [English](README.md) | [Français](README.fr.md)
 
@@ -10,7 +10,88 @@ The operational result: no `.html` file reading occurs in production, and the st
 
 ---
 
-## Installation & Configuration
+## ⚡ Quickstart (Zero to hero) in 3 minutes
+
+Want to see it work immediately? Follow these simple copy-paste steps to test Tmplx without any prior knowledge.
+
+**1. Initialize your project**
+
+```bash
+cargo new my_blazing_fast_app
+cd my_blazing_fast_app
+mkdir templates
+```
+
+**2. Configure `Cargo.toml`**
+_(Add these exact lines at the end of the file)._
+
+```toml
+[dependencies]
+tmplx = "0.1"
+
+[build-dependencies]
+tmplx-compiler = "0.1"
+```
+
+**3. Create the build orchestrator (`build.rs`)**
+_(Create a `build.rs` file at the root, exactly next to `Cargo.toml`)._
+
+```rust
+use std::env;
+use std::path::PathBuf;
+
+fn main() {
+    println!("cargo:rerun-if-changed=templates");
+    let out_dir = env::var("OUT_DIR").unwrap();
+    let dest_path = PathBuf::from(out_dir).join("template_gen.rs");
+    tmplx_compiler::build_workspace("templates", &dest_path);
+}
+```
+
+**4. Create your first template (`templates/index.html`)**
+
+```html
+<h1>Welcome, {%%= view_data.pseudo %}!</h1>
+```
+
+**5. Execute the template in your `src/main.rs`**
+_(Replace everything in `src/main.rs` with this code)._
+
+```rust
+// Automatically load macros generated during the build
+pub mod generated {
+    include!(concat!(env!("OUT_DIR"), "/template_gen.rs"));
+}
+
+// Our perfectly typed data struct
+struct MyViewData {
+    pseudo: String,
+}
+
+fn main() {
+    let data = MyViewData { pseudo: "Arthur".to_string() };
+
+    // Create our HTML buffer
+    let mut html_output = String::new();
+
+    // The magic happens here!
+    generated::render_index!(&mut html_output, &data);
+
+    println!("Generation successful:\n{}", html_output);
+}
+```
+
+**6. Launch the magic!**
+
+```bash
+cargo run
+```
+
+You will instantly see your generated HTML in the console. You are ready to go further!
+
+---
+
+## Installation & configuration
 
 Tmplx relies on a very specific compilation pipeline.
 
@@ -28,7 +109,7 @@ tmplx-compiler = "0.1"
 
 _(Cargo, Rust's package manager, will automatically download these dependencies securely from **crates.io** — the official registry —, then invisibly configure them on the next `cargo build`!)_
 
-### 2. The Build Orchestrator (`build.rs`)
+### 2. The build orchestrator (`build.rs`)
 
 Tmplx compiles your pages **at the same time** as your Rust code. \
 Create a `build.rs` file right at the root of your project (next to `Cargo.toml`) and copy/paste this ready-to-use code:
@@ -50,7 +131,7 @@ fn main() {
 }
 ```
 
-### 3. HTML Templates Folder
+### 3. HTML templates folder
 
 Create your mockups in the `templates/` folder (at the same level as the `src/` folder) with a simple file:
 
@@ -58,22 +139,26 @@ Create your mockups in the `templates/` folder (at the same level as the `src/` 
 
 ---
 
-## Syntax and Interactive Usage Guide
+## Syntax and interactive usage guide
 
 Here, your HTML pages are written very simply with small dynamic tags formatted as `{% ... %}`. Tmplx parses this grammar to inject contextual intelligence.
 
-### 1. Display Variables (Escaped & Raw)
+### 1. Display variables (escaped & raw)
 
-The paramount rule is user data security. Tmplx offers two display modes:
+> ⚠️ **Global security (Raw by default)**: As an architectural choice aiming for absolute zero-allocation performance, Tmplx is **NOT** "safe by default" (unlike Askama or Tera). You **MUST** explicitly request data escaping using the double percent `%%`. Using the simple `{%= %}` tag on untrusted user input will create a direct XSS vulnerability.
 
-- `{%%= view_data.user.name %}` **(Escaped / Secured)**: To use 99% of the time. This tag escapes dangerous HTML to protect you from XSS vulnerabilities.
-- `{%= view_data.html_inject_code %}` **(Raw / Dangerous)**: Displays **exactly** the unaltered text (reserve this for approved / static pieces of HTML code).
+Tmplx provides two strict display modes:
+
+- `{%%= view_data.user.name %}` **(Escaped / Secured)**: To use 99% of the time. This tag escapes dangerous HTML to protect your interfaces.
+- `{%= view_data.html_inject_code %}` **(Raw / Dangerous)**: Displays **exactly** the unaltered text (reserve this strictly for trusted server-generated HTML blocks).
 
 ```html
 <h1>Welcome, {%%= view_data.user.name %}!</h1>
+<!-- ⚠️ Must be secure and internally generated (e.g., compiled markdown) -->
+<div>{%= view_data.html_inject_code %}</div>
 ```
 
-### 2. Spatial Control & Whitespace (Truncation)
+### 2. Spatial control & whitespace (truncation)
 
 If you want to eliminate inadvertent line breaks or whitespaces generated around tags, add a small hyphen (`-`):
 
@@ -84,7 +169,7 @@ If you want to eliminate inadvertent line breaks or whitespaces generated around
 <p>{%- if view_data.is_active -%} Logged in {%- endif -%}</p>
 ```
 
-### 3. Conditional Logic (`if`, `else if`, `else`)
+### 3. Conditional logic (`if`, `else if`, `else`)
 
 Toggle HTML elements via your booleans clearly:
 
@@ -113,7 +198,7 @@ For developers who prefer the Rust style, it is also possible to write your bloc
 {% } %}
 ```
 
-### 4. Iterate and Loop (`for`)
+### 4. Iterate and loop (`for`)
 
 Display HTML lists directly from lists (`Vec<T>` or slices) in Rust:
 
@@ -143,7 +228,7 @@ Within your loops, Tmplx passively makes powerful variables available:
 {% endfor %}
 ```
 
-### 5. Local Assignment (`let`)
+### 5. Local assignment (`let`)
 
 Pre-calculate or manipulate a server-side variable without altering your core component logic:
 
@@ -152,7 +237,7 @@ Pre-calculate or manipulate a server-side variable without altering your core co
 <span>Period: {%%= formatted_date %}</span>
 ```
 
-### 6. Invisible Comments (`{# ... #}`)
+### 6. Invisible comments (`{# ... #}`)
 
 Leave notes without polluting the user interface or the network.
 Unlike HTML comments (`<!-- -->`), Tmplx comments are **absolutely not** part of the final binary (they count for 0 bytes) and vanish at compile-time.
@@ -161,7 +246,7 @@ Unlike HTML comments (`<!-- -->`), Tmplx comments are **absolutely not** part of
 {# FIXME: This block needs to be refactored in the next update #}
 ```
 
-### 7. Modular Architecture (`extends` & `block` Inheritance)
+### 7. Modular architecture (`extends` & `block` inheritance)
 
 Easily manage master "layouts" (no more copy/pasting!):
 
@@ -188,7 +273,7 @@ Easily manage master "layouts" (no more copy/pasting!):
 {% endblock %}
 ```
 
-### 8. Reusable Components (`include`)
+### 8. Reusable components (`include`)
 
 Import sub-components without repeating yourself!
 
@@ -201,7 +286,7 @@ Import sub-components without repeating yourself!
 
 ---
 
-### Duck Typing & Macros
+### Duck typing & macros
 
 Thanks to its new macro-oriented architecture (`#[macro_export]`), Tmplx has eliminated the need for `.toml` manifest files or manually generated explicit contracts.
 
@@ -212,9 +297,9 @@ If you use non-existent fields or calls on the `view_data` structure injected in
 
 ---
 
-## Rust-Side Usage
+## Rust-side usage
 
-### 4. Inclusion of Magic Code
+### 4. Inclusion of magic code
 
 To interact with your templates, Rust needs to retrieve this newly compiled code. In your main Rust code (e.g., `src/main.rs`), add the famous insertion macro at the top of the file:
 
@@ -255,5 +340,5 @@ fn show_page() -> String {
 }
 ```
 
-And that's it! The API offers ideal traceability for your formidable speed Backend applications.
+And that's it! The engine offers ideal traceability for your formidable speed Backend applications.
 Happy coding!

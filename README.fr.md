@@ -1,4 +1,4 @@
-# Tmplx Workspace
+# Tmplx workspace
 
 [English](README.md) | [Français](README.fr.md)
 
@@ -12,7 +12,28 @@ Contrairement aux moteurs traditionnels (Tera, Askama, Handlebars) qui chargent 
 - **Zéro parsing au runtime** : La validité structurelle est garantie par `build.rs`.
 - **Typage absolu** : Les variables injectées (`view_data`) sont vérifiées sémantiquement au strict moment de la compilation par un système de macros (Duck-Typing).
 
-## Architecture du Workspace
+## Architecture du workspace
 
-- `tmplx/` : Crate principal contenant la logique du moteur de build (`build_logic/`) et les traits génériques.
-- `tmplx-test/` : Crate de tests d'intégration, validant le pipeline complet de generation avec `templates/`.
+Voici comment s'organise l'écosystème Tmplx :
+
+```text
+tmplx-workspace/
+├── tmplx/                  # Le moteur principal (publié sur crates.io)
+│   ├── build_logic/        # Logique de compilation (parsing, tokens, génération)
+│   ├── src/                # Code d'exécution (macro, sécurité, duck-typing)
+│   └── templates/          # Templates internes (mockups pour intégration système)
+│
+└── tmplx-test/             # Le projet vitrine (Documentation vivante)
+    ├── benches/            # Algorithmes de tests de charge et comparatif de performance
+    ├── src/                # Exemples exécutables et tests d'intégration complets
+    └── templates/          # Cas d'usages de templates (héritage, logique, locales)
+        └── partials/       # Démonstration de composants web réutilisables
+```
+
+### Exécuter la suite de tests (Documentation vivante)
+
+Pour vérifier la fiabilité absolue du moteur et explorer des exemples métiers concrets (architecture modulaire, assignations locales, limites de troncature), vous pouvez exécuter toutes les validations d'intégration :
+
+```bash
+cargo test -p tmplx-test
+```

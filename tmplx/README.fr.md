@@ -1,4 +1,4 @@
-# Tmplx : Moteur de Templates HTML Haute-Performance
+# Tmplx : moteur de templates HTML haute-performance
 
 [English](README.md) | [Français](README.fr.md)
 
@@ -10,7 +10,88 @@ Le résultat opérationnel : aucune lecture de fichier `.html` ne survient en pr
 
 ---
 
-## Installation & Configuration
+## ⚡ Quickstart (Zéro à Héros) en 3 minutes
+
+Pour tester Tmplx sans aucune connaissance préalable, copiez-collez les étapes suivantes de A à Z.
+
+**1. Initialiser le projet**
+
+```bash
+cargo new mon_site_hyper_rapide
+cd mon_site_hyper_rapide
+mkdir templates
+```
+
+**2. Configurer `Cargo.toml`**
+_(Ajoutez exactement ceci à la fin du fichier)._
+
+```toml
+[dependencies]
+tmplx = "0.1"
+
+[build-dependencies]
+tmplx-compiler = "0.1"
+```
+
+**3. Créer l'orchestrateur de compilation (`build.rs`)**
+_(À créer strictement à la racine, à côté de `Cargo.toml`)._
+
+```rust
+use std::env;
+use std::path::PathBuf;
+
+fn main() {
+    println!("cargo:rerun-if-changed=templates");
+    let out_dir = env::var("OUT_DIR").unwrap();
+    let dest_path = PathBuf::from(out_dir).join("template_gen.rs");
+    tmplx_compiler::build_workspace("templates", &dest_path);
+}
+```
+
+**4. Créer votre premier template (`templates/index.html`)**
+
+```html
+<h1>Bienvenue, {%%= view_data.pseudo %} !</h1>
+```
+
+**5. Exécuter le template dans `src/main.rs`**
+_(Remplacez tout le fichier `src/main.rs` par ceci)._
+
+```rust
+// Chargement automatique des macros générées lors du build
+pub mod generated {
+    include!(concat!(env!("OUT_DIR"), "/template_gen.rs"));
+}
+
+// Notre structure de données parfaitement typée
+struct MaVue {
+    pseudo: String,
+}
+
+fn main() {
+    let donnees = MaVue { pseudo: "Arthur".to_string() };
+
+    // Création de notre buffer HTML
+    let mut resultat_html = String::new();
+
+    // C'est ici qu'opère la magie !
+    generated::render_index!(&mut resultat_html, &donnees);
+
+    println!("Génération réussie :\n{}", resultat_html);
+}
+```
+
+**6. Lancer la magie !**
+
+```bash
+cargo run
+```
+
+Vous verrez instantanément votre HTML généré dans la console. Vous êtes prêt pour la suite !
+
+---
+
+## Installation & configuration
 
 Tmplx repose sur un pipeline de compilation très spécifique.
 
@@ -50,7 +131,7 @@ fn main() {
 }
 ```
 
-### 3. Dossier des Templates HTML
+### 3. Dossier des templates HTML
 
 Créez vos maquettes dans le dossier `templates/` (au même endroit que le dossier `src/`) avec un simple fichier :
 
@@ -58,22 +139,26 @@ Créez vos maquettes dans le dossier `templates/` (au même endroit que le dossi
 
 ---
 
-## Syntaxe et Guide d'Utilisation interactif
+## Syntaxe et guide d'utilisation interactif
 
 Ici, vos pages HTML s'écrivent très simplement par de petites balises dynamiques sous format `{% ... %}`. Tmplx analyse cette grammaire pour injecter de l'intelligence contextuelle.
 
-### 1. Afficher des Variables (Echappées & Brutes)
+### 1. Afficher des variables (échappées & brutes)
 
-La règle primordiale est la sécurité des données utilisateur. Tmplx offre deux affichages :
+> ⚠️ **Sécurité globale (Raw by default)** : Par choix d'architecture ciblant les performances absolues, Tmplx n'est **PAS** "safe by default" (contrairement à Askama ou Tera). Vous **DEVEZ** exiger l'échappement de votre donnée avec un double pourcent `%%`. L'utilisation du tag simple `{%= %}` avec une entrée utilisateur non maîtrisée créera une faille XSS directe.
 
-- `{%%= view_data.user.name %}` **(Échappé / Securisé)** : À utiliser 99% du temps. Cette balise échappe le HTML dangereux pour vous protéger des failles XSS.
-- `{%= view_data.html_inject_code %}` **(Brut / Dangereux)** : Affiche **exactement** le texte non altéré (à réserver aux morceaux de code HTML approuvés / statiques).
+Tmplx offre deux modes d'affichage stricts :
+
+- `{%%= view_data.user.name %}` **(Échappé / Sécurisé)** : À utiliser 99% du temps. Cette balise escape le HTML dangereux pour vous protéger.
+- `{%= view_data.html_inject_code %}` **(Brut / Dangereux)** : Affiche **exactement** le texte non altéré (à réserver exclusivement aux composants de confiance générés côté serveur).
 
 ```html
 <h1>Bienvenue, {%%= view_data.user.name %} !</h1>
+<!-- ⚠️ Doit être sûr et généré en interne (ex: markdown compilé) -->
+<div>{%= view_data.html_inject_code %}</div>
 ```
 
-### 2. Contrôle Spatial & Espaces Blancs (Troncature)
+### 2. Contrôle spatial & espaces blancs (troncature)
 
 Si vous voulez éliminer les retours à la ligne ou espaces blancs générés par inadvertance autour des balises, ajoutez un petit trait d'union (`-`) :
 
@@ -84,7 +169,7 @@ Si vous voulez éliminer les retours à la ligne ou espaces blancs générés pa
 <p>{%- if view_data.is_active -%} Connecté {%- endif -%}</p>
 ```
 
-### 3. La Logique Conditionnelle (`if`, `else if`, `else`)
+### 3. La logique conditionnelle (`if`, `else if`, `else`)
 
 Basculez des éléments HTML via vos booléens avec clarté :
 
@@ -113,7 +198,7 @@ Pour les développeurs préférant le style Rust, il est également possible d'�
 {% } %}
 ```
 
-### 4. Parcourir et Boucler (`for`)
+### 4. Parcourir et boucler (`for`)
 
 Affichez des listes HTML directement depuis des listes (`Vec<T>` ou slices) en Rust :
 
@@ -143,7 +228,7 @@ Dans vos boucles, Tmplx met passivement des variables puissantes à disposition 
 {% endfor %}
 ```
 
-### 5. Affectation Locale (`let`)
+### 5. Affectation locale (`let`)
 
 Pré-calculez ou manipulez une variable côté serveur sans modifier votre logique principale de composant :
 
@@ -152,7 +237,7 @@ Pré-calculez ou manipulez une variable côté serveur sans modifier votre logiq
 <span>Période : {%%= formatted_date %}</span>
 ```
 
-### 6. Les Commentaires Invisibles (`{# ... #}`)
+### 6. Les commentaires invisibles (`{# ... #}`)
 
 Laissez des notes sans polluer l'interface utilisateur ou le réseau.
 Contrairement aux commentaires HTML (`<!-- -->`), les commentaires Tmplx ne font **absolument pas** partie du binaire final (ils comptent pour 0 octet) et disparaissent dès la compilation.
@@ -161,7 +246,7 @@ Contrairement aux commentaires HTML (`<!-- -->`), les commentaires Tmplx ne font
 {# FIXME: Ce bloc doit être refactorisé à la prochaine mise à jour #}
 ```
 
-### 7. Architecture Modulaire (Héritage `extends` & `block`)
+### 7. Architecture modulaire (héritage `extends` & `block`)
 
 Gérez des "layouts" maîtres facilement (fini le copié/collé !) :
 
@@ -201,7 +286,7 @@ Importez des sous-composants sans vous répéter !
 
 ---
 
-### Le Typage Canard (Duck Typing & Macros)
+### Le typage canard (duck typing & macros)
 
 Grâce à sa nouvelle architecture orientée macros (`#[macro_export]`), Tmplx a éliminé le besoin de fichiers manifestes `.toml` ou de contrats explicites générés manuellement.
 
@@ -212,9 +297,9 @@ Si vous utilisez des champs ou appels inexistants sur la structure `view_data` e
 
 ---
 
-## Utilisation Côté Rust
+## Utilisation côté Rust
 
-### 4. Inclusion du Code Magique
+### 4. Inclusion du code magique
 
 Pour interagir avec vos templates, Rust a besoin de récupérer ce code nouvellement compilé. Dans votre code Rust principal (ex. `src/main.rs`), ajoutez le fameux macro d'insertion en haut du fichier :
 
@@ -255,5 +340,5 @@ fn show_page() -> String {
 }
 ```
 
-Et c'est tout ! L'API offre une traçabilité idéale pour vos applications Backend d'une vitesse redoutable.
+Et c'est tout ! Le moteur offre une traçabilité idéale pour vos applications Backend d'une vitesse redoutable.
 Bon code !

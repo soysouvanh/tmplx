@@ -1,0 +1,11 @@
+<div>
+  <h2>Local Variables Example</h2>
+  {% let greeting = format!("Hello, {}!", view_data.user.name); %}
+  <p>{%%= greeting %}</p>
+  <ul>
+  {% for item in view_data.items %}
+    {% let is_even = loop_index % 2 == 0; %}
+    <li class="{% if is_even %}even{% else %}odd{% endif %}">{%%= item %}</li>
+  {% endfor %}
+  </ul>
+</div>

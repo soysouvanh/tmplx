@@ -1,0 +1,8 @@
+<div class="card">
+  <h2>{%%= view_data.user.name %}</h2>
+  {% if view_data.user.is_active -%}
+    <span class="active">Active</span>
+  {%- else -%}
+    <span class="inactive">Inactive</span>
+  {%- endif %}
+</div>

@@ -1,4 +1,4 @@
-# Tmplx Workspace
+# Tmplx workspace
 
 [English](README.md) | [Français](README.fr.md)
 
@@ -12,7 +12,28 @@ Unlike traditional engines (Tera, Askama, Handlebars) that parse templates at ru
 - **Zero runtime parsing**: Structural validity is guaranteed by `build.rs`.
 - **Absolute typing**: Injected variables (`view_data`) are semantically checked at compile-time by Rust macros (Duck-Typing).
 
-## Workspace Architecture
+## Workspace architecture
 
-- `tmplx/` : Core crate containing the build engine logic (`build_logic/`) and generic traits.
-- `tmplx-test/` : Integration test crate, validating the complete generation pipeline with `templates/`.
+Here is how the Tmplx ecosystem is organized:
+
+```text
+tmplx-workspace/
+├── tmplx/                  # The core engine (published on crates.io)
+│   ├── build_logic/        # Compilation logic (parsing, tokenization, code generation)
+│   ├── src/                # Runtime code (macro definitions, security, duck-typing)
+│   └── templates/          # Internal templates (mockups for system integration)
+│
+└── tmplx-test/             # The showcase project (Living documentation)
+    ├── benches/            # Load testing algorithms and performance benchmarking
+    ├── src/                # Executable examples and full integration tests
+    └── templates/          # Template use-cases (inheritance, logic, local assignments)
+        └── partials/       # Reusable web components demonstration
+```
+
+### Running the test suite (Living documentation)
+
+To verify the absolute reliability of the engine and explore the advanced examples (modular architecture, local assignment, truncation limits), you can execute the integration tests:
+
+```bash
+cargo test -p tmplx-test
+```
