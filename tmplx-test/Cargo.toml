@@ -1,0 +1,25 @@
+[package]
+name = "tmplx-test"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+tmplx = { path = "../tmplx" }
+
+[build-dependencies]
+serde_derive = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+
+[dev-dependencies]
+criterion = "0.5"
+askama = "0.12"
+tera = "1.20"
+lazy_static = "1.4"
+
+[[bench]]
+name = "compare_engines"
+harness = false

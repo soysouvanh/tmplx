@@ -1,0 +1,14 @@
+[workspace]
+members = ["tmplx", "tmplx-test"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+authors = ["Vincent SOYSOUVANH <vincent.soysouvanh@gmail.com>"]
+description = "Zero-allocation compile-time HTML template engine"
+readme = "README.md"
+repository = "https://github.com/soysouvanh/tmplx"
+license = "MIT"
+keywords = ["template", "html", "zero-allocation", "build-time"]
+categories = ["template-engine", "web-programming"]

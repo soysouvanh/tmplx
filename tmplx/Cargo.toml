@@ -1,0 +1,19 @@
+[package]
+name = "tmplx"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description.workspace = true
+readme.workspace = true
+repository.workspace = true
+license.workspace = true
+keywords.workspace = true
+categories.workspace = true
+autobins = false
+
+[lib]
+path = "src/lib.rs"
+
+[build-dependencies]
+toml = "0.5"
+serde = { version = "1", features = ["derive"] }

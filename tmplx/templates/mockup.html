@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>{%= view_data.user %}</title>
+</head>
+<body>
+    <h1>Bonjour, {%= view_data.user %}</h1>
+    {%- if view_data.is_admin %}
+    <div class="bandeau-admin">
+        <p>Zone d'administration active.</p>
+        {# WARNING : RAW rendering intentionally not escaped, see S14 #}
+        <div class="contenu-injecte">{%= view_data.html_inject_code %}</div>
+    </div>
+    {%- else %}
+    <p>Espace utilisateur standard.</p>
+    {%- endif %}
+
+    <ul class="liste-utilisateurs">
+    {%- for item in view_data.user_list %}
+        <li>
+            <span>{%%= item.name %}</span>
+            {% if item.is_active %}<span class="badge-actif">actif</span>{% endif %}
+        </li>
+    {%- endfor %}
+    </ul>
+</body>
+</html>
