@@ -2,11 +2,33 @@
 
 [English](README.md) | [Français](README.fr.md)
 
-**Tmplx** is a _Code-Gen-First_ HTML template engine for Rust, architecturally constrained to guarantee **zero dynamic allocation** (0 bytes of heap for static markup) at runtime.
+**Tmplx** is a brutally fast layout engine for Rust apps relying heavily on HTML interface precompilation. Driven strictly by structural typing (Duck-Typing), it generates high-performance rendering macros with no file caching or allocations at runtime.
 
-Rather than interpreting strings during your HTTP server's runtime, Tmplx parses your HTML mockups during the compilation phase (via `build.rs`). It converts every static element into bare `output.push_str()` system calls, and delegates all type-checking to `rustc` upfront.
+### 1. The zero-allocation pipeline
 
-The operational result: no `.html` file reading occurs in production, and the structural typing of your interfaces is proven before the binary even launches.
+Rather than interpreting strings during your HTTP server's runtime, Tmplx parses your HTML mockups during the compilation phase (via `build.rs`). It converts every static element into bare `output.push_str()` system calls and calculates the exact byte-size of your templates upfront.
+
+![Tmplx zero allocation architecture](./assets/architecture.svg)
+
+**How to read this diagram:**
+
+1. **Phase 1 (developer workflow)**: You write standard `.html` files in your text editor.
+2. **Phase 2 (compile time via `build.rs`)**: Instead of shipping `.html` files to production, Tmplx parses them during compilation. It sums the exact byte size of all static characters and compresses the logic into a pure Rust macro (`render_macro!`).
+3. **Phase 3 (runtime execution)**: When a user hits your blazing-fast server, your Rust binary already knows the exact capacity to pre-allocate (`String::with_capacity`). The HTML is rendered using direct pointer insertions pushing exactly 0 bytes to the heap.
+
+The operational result: no `.html` file reading occurs in production. Your HTML markup takes precisely 0 bytes of dynamic memory allocation upon rendering.
+
+### 2. Duck-typing (compile-time safety)
+
+Tmplx doesn't force your Rust logic to derive from heavy, rigid ORM models. It uses structural typing ("Duck-Typing"). The macro simply asserts that your `ViewData` struct possesses the required public fields (like `title` or `email`) at the moment you call it.
+
+![Duck-typing & type safety](./assets/duck_typing.svg)
+
+**How to read this diagram:**
+
+- **The inputs**: You pass a native Rust struct (`ViewData`) to the macro. Tmplx does not force you to inherit from complex ORM traits.
+- **The structural match**: The `render_page!` macro acts as a strict firewall. It verifies that your `ViewData` possesses the exact public properties requested inside the HTML template (e.g. `{{ title }}`).
+- **The guarantee**: If a developer alters a core database property and forgets to update the HTML, the Rust compiler (`rustc`) immediately panics **during the build**. You get a mathematically proven "Panic-free" guarantee in production.
 
 ---
 

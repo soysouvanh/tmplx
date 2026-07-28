@@ -21,7 +21,8 @@ tmplx-workspace/
 ├── tmplx/                  # Le moteur principal (publié sur crates.io)
 │   ├── build_logic/        # Logique de compilation (parsing, tokens, génération)
 │   ├── src/                # Code d'exécution (macro, sécurité, duck-typing)
-│   └── templates/          # Templates internes (mockups pour intégration système)
+│   ├── templates/          # Templates internes (mockups pour intégration système)
+│   └── assets/             # Diagrammes SVG de l'architecture technique
 │
 └── tmplx-test/             # Le projet vitrine (Documentation vivante)
     ├── benches/            # Algorithmes de tests de charge et comparatif de performance

@@ -1,3 +1,4 @@
 spec/
 target/
+*.mmd
 **/*.rs.bk
