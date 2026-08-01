@@ -29,8 +29,8 @@
 // parentheses — see rest of §12). The format for `let` remains deduced
 // by consistency, not confirmed by an exact spec example.
 
-use crate::classifier::{ClassifiedTag, classify};
-use crate::tokenizer::Token;
+use super::classifier::{ClassifiedTag, classify};
+use super::tokenizer::Token;
 
 /// Rule of §5.3: `\`, `"`, `\n`, `\r`, `\t` — in this order (the
 /// backslash FIRST, otherwise backslashes introduced by other
@@ -127,19 +127,19 @@ pub fn generate(tokens: &[Token], function_name: &str, html_path: &str) -> Strin
                 ClassifiedTag::EscapedOutput { ident } => {
                     flush_static(&mut output, &mut static_buffer);
                     output.push_str(&format!(
-                        "    $crate::tmplx_runtime::write_escaped(output, &({ident})); // SOURCE_LINE:{line}\n"
+                        "    ::tmplx::tmplx_runtime::write_escaped(output, &({ident})); // SOURCE_LINE:{line}\n"
                     ));
                 }
                 ClassifiedTag::EscapedOutputJs { ident } => {
                     flush_static(&mut output, &mut static_buffer);
                     output.push_str(&format!(
-                        "    $crate::tmplx_runtime::write_escaped_js(output, &({ident})); // SOURCE_LINE:{line}\n"
+                        "    ::tmplx::tmplx_runtime::write_escaped_js(output, &({ident})); // SOURCE_LINE:{line}\n"
                     ));
                 }
                 ClassifiedTag::EscapedOutputUrl { ident } => {
                     flush_static(&mut output, &mut static_buffer);
                     output.push_str(&format!(
-                        "    $crate::tmplx_runtime::write_escaped_url(output, &({ident})); // SOURCE_LINE:{line}\n"
+                        "    ::tmplx::tmplx_runtime::write_escaped_url(output, &({ident})); // SOURCE_LINE:{line}\n"
                     ));
                 }
                 ClassifiedTag::If { expr } => {

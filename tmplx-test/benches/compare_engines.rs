@@ -1,7 +1,7 @@
 use askama::Template;
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
-use tmplx::models::User;
-use tmplx::render_mockup;
+use tmplx_test::models::User;
+use tmplx_test::render_mockup;
 
 // Askama Setup
 #[derive(Template)]

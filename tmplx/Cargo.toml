@@ -13,7 +13,3 @@ autobins = false
 
 [lib]
 path = "src/lib.rs"
-
-[build-dependencies]
-toml = "0.5"
-serde = { version = "1", features = ["derive"] }

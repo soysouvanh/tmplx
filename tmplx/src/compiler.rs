@@ -1,23 +1,32 @@
-// build.rs — Cargo watch contract (§5.2) + the four passes of
-// §5.3 (tokenization, validation, truncation, resolution + generation)
-// + generation (§4.2). Writes `$OUT_DIR/template_gen.rs`.
+//! Tmplx Compile-Time API.
+//!
+//! This module contains the main orchestrator used inside `build.rs` scripts.
+//! It loads all `.html` files, triggers the four analysis passes of `build_logic`
+//! (tokenization, validation, truncation, generation), and outputs the final source code.
 
-#[path = "build_logic/classifier.rs"]
-mod classifier;
-#[path = "build_logic/generator.rs"]
-mod generator;
+use crate::build_logic::{classifier, generator, tokenizer, truncation, validator};
 
-#[path = "build_logic/tokenizer.rs"]
-mod tokenizer;
-#[path = "build_logic/truncation.rs"]
-mod truncation;
-#[path = "build_logic/validator.rs"]
-mod validator;
+/// Main entry point to compile a repository of templates.
+///
+/// This function must be called from your application's (or test crate's) `build.rs` file.
+///
+/// # Internal Workflow
+///
+/// 1. Declares to the Cargo compiler to watch the `template_dir` folder (rebuilding if files change).
+/// 2. Recursively scans all `.html` files in the directory.
+/// 3. Processes each file through a robust 4-pass architectural pipeline:
+///     - **Pass 1 (Tokenizer)**: Transforms raw text into `Tokens`.
+///     - **Pass 2 (Validator)**: Syntax verification (balancing `if`, `for`, etc.).
+///     - **Pass 3 (Truncation)**: Meticulous whitespace cleanup (`-` inside tags).
+///     - **Pass 4 (Generator)**: Translation into native Rust code via ultra-optimized macros.
+/// 4. Consolidates the result into the `template_gen.rs` file located in `out_dir` (usually `$OUT_DIR`).
+///
+/// # Arguments
+/// - `template_dir`: Directory containing your `.html` files.
+/// - `out_dir`     : Target directory where the generated code will be written.
+pub fn build_workspace(template_dir: &std::path::Path, out_dir: &std::path::Path) {
+    println!("cargo:rerun-if-changed={}", template_dir.display());
 
-fn main() {
-    println!("cargo:rerun-if-changed=templates");
-
-    let template_dir = std::path::Path::new("templates");
     let mut entries = scan_templates(template_dir);
     entries.sort();
 
@@ -43,7 +52,8 @@ fn main() {
             .unwrap()
             .to_str()
             .unwrap()
-            .replace("-", "_");
+            .replace("-", "_")
+            .replace(".", "_");
         let function_name = format!("render_{}", fname);
 
         if !function_names.insert(function_name.clone()) {
@@ -59,26 +69,9 @@ fn main() {
         final_code.push('\n');
     }
 
-    let out_dir = std::env::var("OUT_DIR").expect("OUT_DIR not defined by Cargo");
-    let output_path = std::path::Path::new(&out_dir).join("template_gen.rs");
+    let output_path = out_dir.join("template_gen.rs");
     std::fs::write(&output_path, &final_code)
         .unwrap_or_else(|e| panic!("writing to {output_path:?} failed: {e}"));
-
-    // --- Extra generation, from synthetic
-    // templates (not templates/mockup.html), to provide
-    // "actually compiles and runs" coverage to §12 cases that the
-    // reference mockup doesn't exercise: case 10 (nested `{% for %}`
-    // via a field, item.sub_list) and case 12 (`{% if !ident %}`).
-    // Written to a SEPARATE file: template_gen.rs (§10.3 golden test)
-    // is untouched.
-    let extra_template = "{%- for g in groups %}{%- for m in g.members %}[{%= m.name %}]{%- endfor %}{%- endfor %}{% if !is_active %}(INACTIVE){% endif %}";
-    let mut tokens_extra = tokenizer::tokenize(extra_template);
-    validator::validate_pairing(&tokens_extra);
-    truncation::apply_truncation(&mut tokens_extra);
-    let code_extra = generator::generate(&tokens_extra, "render_extra_12", "extra_template");
-    let extra_path = std::path::Path::new(&out_dir).join("extra_tests_gen.rs");
-    std::fs::write(&extra_path, &code_extra)
-        .unwrap_or_else(|e| panic!("writing {extra_path:?} failed: {e}"));
 }
 
 fn scan_templates(dir: &std::path::Path) -> Vec<std::path::PathBuf> {
@@ -90,12 +83,6 @@ fn scan_templates(dir: &std::path::Path) -> Vec<std::path::PathBuf> {
                 entries.extend(scan_templates(&path));
             } else if let Some(ext) = path.extension()
                 && ext == "html"
-                && !path
-                    .file_name()
-                    .unwrap()
-                    .to_str()
-                    .unwrap()
-                    .contains("askama")
             {
                 entries.push(path);
             }

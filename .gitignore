@@ -1,4 +1,6 @@
 spec/
 target/
+repomix.config.json
+repomix-output.xml
 *.mmd
 **/*.rs.bk
