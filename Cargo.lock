@@ -922,11 +922,11 @@ dependencies = [
 
 [[package]]
 name = "tmplx"
-version = "0.2.0"
+version = "0.2.1"
 
 [[package]]
 name = "tmplx-test"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "askama",
  "criterion",
