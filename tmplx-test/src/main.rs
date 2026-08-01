@@ -267,4 +267,65 @@ mod examples {
 
         println!("Local Assignment Output:\n{}", output);
     }
+
+    /// Example: Exhaustive Features Tour
+    /// Demonstrates pedagogical excellence covering all escaping paradigms, advanced control flow, truncation, and modular inclusions.
+    #[test]
+    fn example_03_exhaustive_features() {
+        // Data tailored to cover every feature of the engine cleanly.
+        struct ExhaustiveData {
+            raw_html: &'static str,
+            unsafe_text: &'static str,
+            condition: u8,
+            items: Vec<&'static str>,
+            is_valid: bool,
+            user: User,
+        }
+
+        let mut output = String::with_capacity(4096);
+        let data = ExhaustiveData {
+            raw_html: "<span style='color:red'>Trusted Inject!</span>",
+            unsafe_text: "alert('XSS'); O'Connor & \"friends\"",
+            condition: 2,
+            items: vec!["Alpha", "Bravo", "Charlie"],
+            is_valid: false,
+            user: User {
+                name: "Instructor".to_string(),
+                is_active: true,
+            },
+        };
+
+        tmplx_test::render_exhaustive_features!(&mut output, &data);
+
+        println!("Exhaustive Features Output:\n{}", output);
+
+        // 1. Validating Raw Insertion (No changes)
+        assert!(output.contains("<span style='color:red'>Trusted Inject!</span>"));
+
+        // 2. Validating HTML Escaping
+        assert!(output.contains("alert(&#39;XSS&#39;); O&#39;Connor &amp; &quot;friends&quot;"));
+
+        // 3. Validating JS Escaping (hex escaping for embedded script safety)
+        assert!(
+            output.contains(r#"var safeJsPayload = "alert(\'XSS\'); O\'Connor \x26 \"friends\"";"#)
+        );
+
+        // 4. Validating URL Escaping (% encoding)
+        assert!(output.contains(
+            "href=\"/search?q=alert%28%27XSS%27%29%3B%20O%27Connor%20%26%20%22friends%22\""
+        ));
+
+        // 5. Validating Advanced Control Flow & Truncation (Whitespace Stripping)
+        assert!(output.contains(
+            "<div class=\"state-indicator\"><span class=\"badge two\">Condition is TWO</span></div>"
+        ));
+
+        // 6. Validating Inverted Condition
+        assert!(output.contains("<strong>Warning:</strong> The current data state is invalid!"));
+
+        // 7. Validating Component Inclusion (card.html)
+        assert!(output.contains("<h2>Instructor</h2>"));
+
+        println!("Exhaustive Features Output:\n{}", output);
+    }
 }

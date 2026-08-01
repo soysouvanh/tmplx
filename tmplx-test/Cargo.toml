@@ -15,10 +15,14 @@ tmplx = { path = "../tmplx" }
 tmplx = { path = "../tmplx" }
 
 [dev-dependencies]
-criterion = "0.5"
-askama = "0.12"
-tera = "1.20"
+criterion = "0.8.2"
+askama = "0.16.0"
+tera = "2.1.0"
 lazy_static = "1.4"
+sailfish = "0.11.2"
+maud = "0.27.0"
+markup = "0.16.0"
+serde_json = "1.0.151"
 
 [[bench]]
 name = "compare_engines"

@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="exhaustive-tour">
+    <h2>1. Variables and Escaping Demonstrations</h2>
+    <!-- Raw Output: No escaping, fast inject for trusted DOM nodes -->
+    <div class="raw-box">{%= view_data.raw_html %}</div>
+
+    <!-- HTML Escaped: Context-aware security for text -->
+    <p class="safe-text">{%%= view_data.unsafe_text %}</p>
+
+    <!-- JS Escaped: Safe embedding inside <script> blocks -->
+    <script>
+        var safeJsPayload = "{% js= view_data.unsafe_text %}";
+        console.log(safeJsPayload);
+    </script>
+
+    <!-- URL Escaped: Safe embedding in parameters -->
+    <a class="btn-search" href="/search?q={% url= view_data.unsafe_text %}">Search</a>
+
+    <h2>2. Advanced Control Flow and Truncation</h2>
+    <!-- Precise whitespace control to eliminate unwanted newlines -->
+    <div class="state-indicator">
+    {%- if view_data.condition == 1 -%}
+        <span class="badge one">Condition is ONE</span>
+    {%- else if view_data.condition == 2 -%}
+        <span class="badge two">Condition is TWO</span>
+    {%- else -%}
+        <span class="badge other">Condition is OTHER</span>
+    {%- endif -%}
+    </div>
+
+    <h2>3. Loops and Server-Side Assignment</h2>
+    <ul class="data-list">
+    {%- for item in view_data.items %}
+        <!-- Using let to create complex runtime expressions during macro generation without reallocation overhead -->
+        {%- let formatted = format!("Processed {}", item); %}
+        <li>{%%= formatted %}</li>
+    {%- endfor %}
+    </ul>
+
+    <h2>4. Inverted Conditions</h2>
+    {%- if !view_data.is_valid %}
+    <div class="alert alert-danger">
+        <strong>Warning:</strong> The current data state is invalid!
+    </div>
+    {%- endif %}
+    
+    <h2>5. Modular Component Inclusion</h2>
+    <!-- Included partial inherits the current scope / context automatically if passed -->
+    {% include "partials/card.html" %}
+</div>
+{% endblock %}

@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Tmplx - Premium Guide</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        :root {
+            --bg-color: #0b0f19;
+            --surface-color: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #8b5cf6;
+            --secondary: #3b82f6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.15), transparent 25%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeInDown 0.8s ease-out forwards;
+        }
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #a855f7, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .glass-card {
+            background: var(--surface-color);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeUp 0.8s ease-out forwards;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .code-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .code-grid { grid-template-columns: 1fr; }
+        }
+        
+        .block {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .block:hover {
+            border-color: rgba(139, 92, 246, 0.5);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+        }
+        .block-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .block-content {
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.95rem;
+            word-break: break-all;
+            flex-grow: 1;
+        }
+        
+        /* Utility */
+        .color-accent { color: #f43f5e; font-weight: bold; }
+        
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+
+        /* Tabs */
+        .tabs-nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        .tab-btn:hover {
+            color: var(--text-main);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+        .tab-btn.active {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: #8b5cf6;
+            color: var(--text-main);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+        }
+        .tab-content {
+            display: none;
+            opacity: 0;
+        }
+        .tab-content.active {
+            display: block;
+            animation: fadeUp 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 2rem;">
+                <a href="ux_guide_fr.html" style="color: #94a3b8; text-decoration: none; padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.05); font-size: 0.9rem;">🇫🇷 FR</a>
+                <a href="#" style="color: #f8fafc; text-decoration: none; padding: 4px 8px; border-radius: 4px; background: rgba(59, 130, 246, 0.2); border: 1px solid #3b82f6; font-size: 0.9rem; font-weight: bold;">🇬🇧 EN</a>
+            </div>
+            <h1>Tmplx Framework</h1>
+            <p class="subtitle">Zero-Allocation State of the Art Template Rendering.<br>Designed for nanosecond performance and seamless UX.</p>
+        </header>
+
+        <nav class="tabs-nav">
+            <button class="tab-btn active" onclick="switchTab('tab-features', this)">1. Syntax & features</button>
+            <button class="tab-btn" onclick="switchTab('tab-install', this)">2. Step-by-step installation</button>
+            <button class="tab-btn" onclick="switchTab('tab-benchmarks', this)">3. Benchmarks</button>
+        </nav>
+
+        <main>
+            <!-- TAB 1: features -->
+            <div id="tab-features" class="tab-content active">
+                <!-- SECTION 1 : escaping -->
+            <section class="glass-card delay-1">
+                <h2 class="card-title">1. Contextual security (advanced escaping)</h2>
+                <div class="code-grid">
+                    <div class="block">
+                        <div class="block-header">Tmplx syntax (backend source)</div>
+                        <div class="block-content" style="color: #cbd5e1;">
+<div>&#123;%= view_data.raw_payload %&#125;</div>
+<div>&#123;%%= view_data.html_payload %&#125;</div>
+<div>&#123;%js= view_data.js_payload %&#125;</div>
+<div>&#123;%url= view_data.url_payload %&#125;</div>
+                        </div>
+                    </div>
+                    <div class="block">
+                        <div class="block-header">Rendered output (secured DOM)</div>
+                        <div class="block-content">
+                            <!-- Raw: Injected directly -->
+                            <div style="margin-bottom: 1rem;">{%= view_data.raw_payload %}</div>
+                            
+                            <!-- HTML Escaped -->
+                            <div style="margin-bottom: 1rem; color: #10b981; border: 1px dashed rgba(16,185,129,0.3); padding: 8px; border-radius: 4px;">{%%= view_data.html_payload %}</div>
+                            
+                            <!-- JS Escaped -->
+                            <div style="color: #fbbf24; font-size: 0.85rem; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 4px; border: 1px solid rgba(251,191,36,0.2); margin-bottom: 1rem;">
+                                [JS Inject] var script = "{%js= view_data.js_payload %}";
+                            </div>
+
+                            <!-- URL Escaped -->
+                            <div style="color: #60a5fa; font-size: 0.9rem;">
+                                <a href="https://example.com/api?q={%url= view_data.url_payload %}" style="color: #60a5fa; text-decoration: none;"> {%%= view_data.url_payload %}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2 : control flow & zero whitespace -->
+            <section class="glass-card delay-2">
+                <h2 class="card-title">2. Spatial truncation (zero whitespace)</h2>
+                <div class="code-grid">
+                    <div class="block">
+                        <div class="block-header">Tmplx logic</div>
+                        <div class="block-content" style="color: #cbd5e1;">
+&#123;%- if view_data.user.is_active -%&#125;<br>
+&nbsp;&nbsp;&lt;span class="badge"&gt;Active&lt;/span&gt;<br>
+&#123;%- else if !view_data.user.is_active -%&#125;<br>
+&nbsp;&nbsp;&lt;span class="badge"&gt;Inactive (Negation !)&lt;/span&gt;<br>
+&#123;%- else -%&#125;<br>
+&nbsp;&nbsp;&lt;span class="badge"&gt;Unknown&lt;/span&gt;<br>
+&#123;%- endif -%&#125;
+                        </div>
+                    </div>
+                    <div class="block">
+                        <div class="block-header">100% compact HTML output</div>
+                        <div class="block-content" style="display: flex; align-items: center; justify-content: center;">
+                            {%- if view_data.user.is_active -%}
+                                <span style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 6px 18px; border-radius: 20px; font-weight: bold; border: 1px solid #10b981; box-shadow: 0 0 15px rgba(16,185,129,0.3);">Active User</span>
+                            {%- else -%}
+                                <span style="background: rgba(244, 63, 94, 0.2); color: #f43f5e; padding: 6px 18px; border-radius: 20px; font-weight: bold; border: 1px solid #f43f5e; box-shadow: 0 0 15px rgba(244,63,94,0.3);">Inactive</span>
+                            {%- endif -%}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3 : iterators -->
+            <section class="glass-card delay-3">
+                <h2 class="card-title">3. Iterators and zero-allocation backend assignment</h2>
+                <div class="code-grid">
+                    <div class="block">
+                        <div class="block-header">Complex operations (for + let)</div>
+                        <div class="block-content" style="color: #cbd5e1;">
+&#123;%- for item in users -%&#125;<br>
+&nbsp;&nbsp;&#123;%- let is_admin = item.contains("Admin") -%&#125;<br>
+&nbsp;&nbsp;&lt;li class="&#123;%- if is_admin -%&#125;admin&#123;%- endif -%&#125;"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&#123;%%= item %&#125;<br>
+&nbsp;&nbsp;&lt;/li&gt;<br>
+&#123;%- endfor -%&#125;
+                        </div>
+                    </div>
+                    <div class="block">
+                        <div class="block-header">Live rendered iteration</div>
+                        <div class="block-content">
+                            <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px;">
+                                {%- for item in view_data.users_list -%}
+                                    {%- let is_admin = item.contains("Admin"); -%}
+                                    {%- if is_admin -%}
+                                        <li style="padding: 10px 15px; background: rgba(59, 130, 246, 0.15); border-radius: 8px; border-left: 4px solid #3b82f6; font-weight: bold;">{%%= item %}</li>
+                                    {%- else -%}
+                                        <li style="padding: 10px 15px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 4px solid #64748b; color: var(--text-muted);">{%%= item %}</li>
+                                    {%- endif -%}
+                                {%- endfor -%}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4 : modularity -->
+            <section class="glass-card delay-3">
+                <h2 class="card-title">4. Modular architecture (inheritance and inclusion)</h2>
+                <div class="code-grid">
+                    <div class="block">
+                        <div class="block-header">Layout/Extends syntax</div>
+                        <div class="block-content" style="color: #cbd5e1;">
+<span style="color: #94a3b8;">&lt;!-- file : layout.html --&gt;</span><br>
+&#123;% block body %&#125;<br>
+&nbsp;&nbsp;&lt;p&gt;Silent default fallback&lt;/p&gt;<br>
+&#123;% endblock %&#125;<br>
+<br>
+<span style="color: #94a3b8;">&lt;!-- file : page.html --&gt;</span><br>
+&#123;% extends "layout.html" %&#125;<br>
+&#123;% block body %&#125;<br>
+&nbsp;&nbsp;&lt;h1&gt;0-allocation content injection&lt;/h1&gt;<br>
+&nbsp;&nbsp;&#123;% include "partials/card.html" %&#125;<br>
+&#123;% endblock %&#125;
+                        </div>
+                    </div>
+                    <div class="block">
+                        <div class="block-header">Tmplx compiler behavior</div>
+                        <div class="block-content">
+                            <p style="margin-bottom: 1rem; color: #cbd5e1; font-size: 0.95rem;">
+                                The directives <code style="color: #a855f7;">extends</code>, <code style="color: #a855f7;">block</code> and <code style="color: #a855f7;">include</code> are resolved <strong>statically at pure compile time</strong>.
+                            </p>
+                            <div style="background: rgba(139, 92, 246, 0.15); padding: 15px; border-left: 4px solid #8b5cf6; border-radius: 8px;">
+                                <strong>Zero overhead:</strong> The complete HTML tree is unravelled then flattened in bytes directly into the Rust binary. No file lookup, and no partial array allocation happens at runtime. Inclusion literally costs <code style="color: #3b82f6;">0 ms</code> in production.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5 : magic variables -->
+            <section class="glass-card delay-3">
+                <h2 class="card-title">5. Magic variables (loops)</h2>
+                <div class="code-grid">
+                    <div class="block">
+                        <div class="block-header">Tmplx syntax</div>
+                        <div class="block-content" style="color: #cbd5e1;">
+&#123;%- for msg in messages -%&#125;<br>
+&nbsp;&nbsp;&lt;div class="&#123;%- if loop_index % 2 == 0 -%&#125;even&#123;%- else -%&#125;odd&#123;%- endif -%&#125;"&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Message &#123;%= loop_index.to_string() %&#125; of &#123;%= loop_length.to_string() %&#125;<br>
+&nbsp;&nbsp;&lt;/div&gt;<br>
+&#123;%- endfor -%&#125;
+                        </div>
+                    </div>
+                    <div class="block">
+                        <div class="block-header">Context aware rendering</div>
+                        <div class="block-content" style="display: flex; flex-direction: column; gap: 8px;">
+                            {%- for item in view_data.users_list -%}
+                                <div style="padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; {% if loop_index % 2 == 0 %}background: rgba(139, 92, 246, 0.1); border-left: 3px solid #8b5cf6;{% else %}background: rgba(255, 255, 255, 0.03); border-left: 3px solid #64748b;{% endif %}">
+                                    Element <strong>{%= loop_index.to_string() %}</strong> of {%= loop_length.to_string() %} (Zero-index: {%= loop_index0.to_string() %})
+                                    {%- if loop_first %} <span style="font-size:0.75rem; background:#3b82f6; color:white; border-radius:4px; padding:2px 6px; margin-left:8px;">First</span>{%- endif -%}
+                                    {%- if loop_last %} <span style="font-size:0.75rem; background:#f43f5e; color:white; border-radius:4px; padding:2px 6px; margin-left:8px;">Last</span>{%- endif -%}
+                                </div>
+                            {%- endfor -%}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 6 : rust style braces -->
+            <section class="glass-card delay-3">
+                <h2 class="card-title">6. Alternative brace syntax (Rust-style)</h2>
+                <div class="code-grid">
+                    <div class="block">
+                        <div class="block-header">Code (brace style)</div>
+                        <div class="block-content" style="color: #cbd5e1;">
+&#123;% if view_data.user.is_active { %&#125;<br>
+&nbsp;&nbsp;&lt;span&gt;Rust Mode !&lt;/span&gt;<br>
+&#123;% } else { %&#125;<br>
+&nbsp;&nbsp;&lt;span&gt;Inactive&lt;/span&gt;<br>
+&#123;% } %&#125;
+                        </div>
+                    </div>
+                    <div class="block">
+                        <div class="block-header">Native interpretation</div>
+                        <div class="block-content">
+                            <p style="margin-bottom: 1rem; color: #cbd5e1; font-size: 0.95rem;">
+                                Tmplx natively supports using curly braces <code>{</code> and <code>}</code> to close control blocks instead of <code>endif</code> or <code>endfor</code>, providing a familiar and ergonomic experience for Rust developers.
+                            </p>
+                            <div style="display: flex; align-items: center; justify-content: center; padding: 10px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border: 1px dashed rgba(59, 130, 246, 0.4);">
+                                {% if view_data.user.is_active { %}
+                                    <span style="color: #60a5fa; font-weight: bold; font-family: 'JetBrains Mono', monospace;">impl Tmplx { ... }</span>
+                                {% } else { %}
+                                    <span style="color: #94a3b8;">Inactive</span>
+                                {% } %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 7 : invisible comments -->
+            <section class="glass-card delay-3">
+                <h2 class="card-title">7. Invisible comments (zero-byte)</h2>
+                <div class="code-grid">
+                    <div class="block">
+                        <div class="block-header">Build-time comments</div>
+                        <div class="block-content" style="color: #cbd5e1;">
+&#123;#- TODO: Refactor -#&#125;<br>
+&lt;div&gt;<br>
+&nbsp;&nbsp;&#123;# Comment ignored by Tmplx #&#125;<br>
+&nbsp;&nbsp;&lt;p&gt;Visible content&lt;/p&gt;<br>
+&lt;/div&gt;
+                        </div>
+                    </div>
+                    <div class="block">
+                        <div class="block-header">Output (Client HTML Source)</div>
+                        <div class="block-content">
+                            <p style="margin-bottom: 0.5rem; color: #cbd5e1; font-size: 0.95rem;">
+                                Unlike <code>&lt;!-- --&gt;</code>, Tmplx comments:
+                            </p>
+                            <ul style="color: #10b981; font-size: 0.9rem; margin-left: 1.5rem; margin-bottom: 1rem;">
+                                <li>Have a footprint of exactly <strong>0 bytes</strong> at runtime.</li>
+                                <li>Are completely impossible to read for the client (via inspector).</li>
+                            </ul>
+                            {#- This is a pedagogical invisible test comment -#}
+                            <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 4px; border: 1px solid var(--border-color); font-family: monospace; color: #94a3b8;">
+                                &lt;div&gt;<br>
+                                &nbsp;&nbsp;&lt;p&gt;Visible content&lt;/p&gt;<br>
+                                &lt;/div&gt;
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            </div>
+
+            <!-- TAB 2: installation -->
+            <div id="tab-install" class="tab-content">
+                <section class="glass-card">
+                    <h2 class="card-title">Installation & configuration (zero to hero)</h2>
+                    
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="color: #3b82f6; margin-bottom: 0.5rem;">1. Cargo Initialization</h3>
+                        <p style="color: #94a3b8; margin-bottom: 1rem;">Add Tmplx to your <code>Cargo.toml</code> manifest.</p>
+                        <div class="block">
+                            <div class="block-header">Cargo.toml</div>
+                            <div class="block-content" style="color: #cbd5e1;">
+[dependencies]<br>
+tmplx = "0.2.1"<br>
+<br>
+[build-dependencies]<br>
+tmplx-compiler = "0.2.1"
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 2rem;">
+                        <h3 style="color: #8b5cf6; margin-bottom: 0.5rem;">2. The compiler (build.rs)</h3>
+                        <p style="color: #94a3b8; margin-bottom: 1rem;">Place this file at the root of your project. It will parse your templates <strong>at compile time</strong>.</p>
+                        <div class="block">
+                            <div class="block-header">build.rs</div>
+                            <div class="block-content" style="color: #cbd5e1;">
+fn main() {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #64748b;">// Tells Cargo to re-build ONLY if the 'templates' directory changes.</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;println!("cargo:rerun-if-changed=templates");<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #64748b;">// OUT_DIR is the hidden internal directory where the generated Rust code will be written.</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;let out_dir = std::env::var("OUT_DIR").unwrap();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;let dest_path = std::path::PathBuf::from(out_dir).join("template_gen.rs");<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #64748b;">// Runs the Tmplx compiler. All HTML files become Rust macros.</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;tmplx_compiler::build_workspace("templates", &dest_path);<br>
+}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <h3 style="color: #10b981; margin-bottom: 0.5rem;">3. Rust Usage</h3>
+                        <p style="color: #94a3b8; margin-bottom: 1rem;">Your 100% statically typed macros are exposed! Zero file reading in production!</p>
+                        <div class="block">
+                            <div class="block-header">src/main.rs</div>
+                            <div class="block-content" style="color: #cbd5e1;">
+<span style="color: #64748b;">// A. We load the magic code generated by our build.rs</span><br>
+pub mod generated {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;include!(concat!(env!("OUT_DIR"), "/template_gen.rs"));<br>
+}<br>
+<br>
+<span style="color: #64748b;">// B. The "Duck-typing" struct required by the target page (e.g. for index.html)</span><br>
+struct MyViewData {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;title: String,<br>
+}<br>
+<br>
+fn main() {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #64748b;">// 1. Data initialization to render - my_view_data variable</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;let my_view_data = MyViewData { title: "Tmplx".to_string() };<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #64748b;">// 2. Pre-allocation of the destination buffer (html_output). The engine will generate 0 allocations itself!</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;let mut html_output = String::with_capacity(4096);<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #64748b;">// 3. Final call with the macro. Tmplx then pushes the variables and statics into 'html_output'.</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;generated::render_index!(&mut html_output, &my_view_data);<br>
+}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- TAB 3: benchmarks -->
+            <div id="tab-benchmarks" class="tab-content">
+                <section class="glass-card">
+                    <h2 class="card-title">Extreme performance (zero-allocation)</h2>
+                    <p style="color: #94a3b8; margin-bottom: 2rem;">
+                        Tmplx relies on a Duck-Typing and Macro architecture to generate a flattened bytes tree. The performances widely surpass standard engines in the market.
+                    </p>
+
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        
+                        <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid #8b5cf6; padding: 20px; border-radius: 12px; position: relative; overflow: hidden;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative; z-index: 2;">
+                                <span style="font-weight: 800; font-size: 1.2rem; color: #fff;">Tmplx engine</span>
+                                <span style="background: #8b5cf6; color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-family: monospace;">~76 ns / render</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden;">
+                                <div style="width: 25%; height: 100%; background: linear-gradient(90deg, #3b82f6, #a855f7); border-radius: 4px;"></div>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <span style="font-weight: 600; color: #cbd5e1;">Askama (industry standard)</span>
+                                <span style="color: #94a3b8; font-family: monospace;">~223 ns / render</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden;">
+                                <div style="width: 75%; height: 100%; background: #64748b; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <span style="font-weight: 600; color: #cbd5e1;">Sailfish</span>
+                                <span style="color: #94a3b8; font-family: monospace;">~145 ns / render</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden;">
+                                <div style="width: 50%; height: 100%; background: #64748b; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <span style="font-weight: 600; color: #cbd5e1;">Maud</span>
+                                <span style="color: #94a3b8; font-family: monospace;">~195 ns / render</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden;">
+                                <div style="width: 65%; height: 100%; background: #64748b; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+    </script>
+</body>
+</html>

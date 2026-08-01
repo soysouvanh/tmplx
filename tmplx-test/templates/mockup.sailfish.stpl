@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title><%= self.user %></title>
+</head>
+<body>
+    <h1>Bonjour, <%= self.user %></h1>
+    <% if self.is_admin { %>
+    <div class="bandeau-admin">
+        <p>Zone d'administration active.</p>
+        {# WARNING : RAW rendering intentionally not escaped, see S14 #}
+        <div class="contenu-injecte"><%- self.html_inject_code %></div>
+    </div>
+    <% } else { %>
+    <p>Espace utilisateur standard.</p>
+    <% } %>
+
+    <ul class="liste-utilisateurs">
+    <% for item in self.user_list { %>
+        <li>
+            <span><%= item.name %></span>
+            <% if item.is_active { %><span class="badge-actif">actif</span><% } %>
+        </li>
+    <% } %>
+    </ul>
+</body>
+</html>
