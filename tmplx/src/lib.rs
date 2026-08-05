@@ -1,28 +1,61 @@
 //! # Tmplx: Zero-Allocation, Statically Compiled Template Engine
 //!
 //! **Tmplx** is an HTML template engine engineered for extreme performance (State of the Art)
-//! and absolute security. Unlike traditional engines (which interpret at runtime
-//! or dynamically allocate memory), Tmplx translates your HTML templates directly
-//! into highly optimized Rust macros during the compilation phase (via `build.rs`).
+//! and absolute security.
 //!
-//! ## Framework Architecture
+//! Unlike traditional engines that read files and parse logic dynamically at runtime (causing memory overhead),
+//! **Tmplx translates your HTML templates directly into highly optimized Rust macros during your project's compilation phase** (via `build.rs`).
 //!
-//! The framework is divided into two strictly isolated domains:
-//! - **Compile-Time**: The [`compiler`] module and the internal logic
-//!   ([`build_logic`]) are executed. They meticulously parse your HTML files (tokenization,
-//!   pairing validation, application of truncation rules) and generate native Rust code.
-//! - **Runtime**: Only the [`tmplx_runtime`] module remains, providing minimalist
-//!   tooling (exclusively dedicated to XSS escaping) designed to write data
-//!   directly into the final buffer without *any* double allocation.
+//! ## 🧠 Mental Model: How it works (Pedagogical Overview)
 //!
-//! ## SOTA (State of the Art) Design Principles
+//! 1. **Compile-Time (You write HTML)**
+//!    You write standard HTML enriched with `{% %}` syntax.
+//!    During `cargo build`, Tmplx reads your HTML files, parses them securely, blocks any vulnerabilities (like Path Traversal), and translates them into pure `Rust` code.
 //!
-//! 1. **Extreme Performance**: The size of the static HTML segments is computed at compile-time.
-//!    At runtime, a single pre-sized allocation is sufficient for the entire page rendering.
-//! 2. **Security by Default**: XSS injections are structurally mitigated via explicit
-//!    stream-based escaping routines (`{%%= %}` for HTML, `{%js= %}` for JS).
-//! 3. **Pedagogical Architecture**: The 4-pass pipeline is designed to be read and audited.
-//!    Everything is crystal clear, explicit, with no hidden abstractions.
+//! 2. **Runtime (Your Server runs)**
+//!    Your server imports the generated Rust. Rendering a template is exactly as fast as calling a pre-compiled `output.push_str("<html>...")` function.
+//!    **Result: Zero bytes of heap memory allocated** dynamically.
+//!
+//! ## 🚀 Quickstart Example
+//!
+//! **1. Create your template (`templates/hello.html`)**
+//! ```html
+//! <h1>Hello {%= name %}</h1>
+//! ```
+//!
+//! **2. Compile it (`build.rs`)**
+//! ```rust,ignore
+//! fn main() {
+//!     let template_dir = std::path::Path::new("templates");
+//!     let out_dir = std::path::Path::new(&std::env::var("OUT_DIR").unwrap());
+//!     // This generates the `render_hello!` macro automatically.
+//!     tmplx::compiler::build_workspace_strict(template_dir, out_dir);
+//! }
+//! ```
+//!
+//! **3. Run it (`src/main.rs`)**
+//! ```rust,ignore
+//! // Output buffer, pre-sized to exactly the right capacity.
+//! let mut html_output = String::with_capacity(1024);
+//! render_hello!(&mut html_output, &view_data);
+//! // Boom! Rendering completed instantly without any hidden memory allocation.
+//! ```
+//!
+//! ## 🛡️ Security by Default (Contextual Escaping)
+//!
+//! Cross-Site Scripting (XSS) is prevented by an explicit, context-aware syntax:
+//! - `{%= your_var %}` : **Raw output**, explicitly requested by you. (Forbidden in strict mode).
+//! - `{%%= your_var %}` : **HTML Escaping**, safe for generic text.
+//! - `{%js= your_var %}` : **JavaScript Escaping**, safe inside `<script>` tags.
+//! - `{%url= your_var %}` : **URL Encoding**, safe for `href="..."` attributes.
+//!
+//! *Pedagogical note: We enforce explicit escaping tags so you always remain conscious of the data's destination context.*
+//!
+//! ## 🏛️ Framework Architecture
+//!
+//! The codebase is cleanly separated to enforce the mental model:
+//! - **Compile-Time ([`compiler`])**: The heavy lifting. Lexing, semantic validation, and macro generation.
+//! - **Runtime ([`tmplx_runtime`])**: A tiny, ultra-optimized module deployed alongside your binary, exclusively containing zero-allocation XSS mitigations.
 
 pub mod build_logic;
 pub mod compiler;

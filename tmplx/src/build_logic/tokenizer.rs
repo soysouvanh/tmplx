@@ -33,14 +33,21 @@ pub enum Token<'a> {
     },
 }
 
-/// 1-indexed line of the byte position `pos` in `source` (§5.3:
-/// recalculated on demand by counting preceding `\n`, never
-/// maintained as a running counter during scan — eliminates all risk of drift).
-fn line_at(source: &str, pos: usize) -> usize {
-    1 + source.as_bytes()[..pos]
-        .iter()
-        .filter(|&&b| b == b'\n')
-        .count()
+fn find_next_delimiter(source: &str, start: usize) -> Option<(usize, DelimiterType)> {
+    let bytes = source.as_bytes();
+    let mut i = start;
+    while i + 1 < bytes.len() {
+        if bytes[i] == b'{' {
+            if bytes[i + 1] == b'%' {
+                return Some((i, DelimiterType::Instruction));
+            }
+            if bytes[i + 1] == b'#' {
+                return Some((i, DelimiterType::Comment));
+            }
+        }
+        i += 1;
+    }
+    None
 }
 
 /// Pass 1 (§5.3): splits `source` into a flat sequence of
@@ -49,30 +56,37 @@ fn line_at(source: &str, pos: usize) -> usize {
 pub fn tokenize(source: &str) -> Vec<Token<'_>> {
     let mut tokens = Vec::new();
     let mut pos = 0usize;
+    let mut line = 1usize;
+    let mut last_counted = 0usize;
 
     loop {
-        let next_instr = source[pos..].find("{%");
-        let next_comm = source[pos..].find("{#");
-
-        let (rel, delimiter, opening, closing) = match (next_instr, next_comm) {
-            (None, None) => {
+        let (rel, delimiter, opening, closing) = match find_next_delimiter(source, pos) {
+            None => {
                 tokens.push(Token::Static {
                     text: &source[pos..],
                 });
                 break;
             }
-            (Some(i), None) => (i, DelimiterType::Instruction, "{%", "%}"),
-            (None, Some(c)) => (c, DelimiterType::Comment, "{#", "#}"),
-            (Some(i), Some(c)) if i <= c => (i, DelimiterType::Instruction, "{%", "%}"),
-            (Some(_), Some(c)) => (c, DelimiterType::Comment, "{#", "#}"),
+            Some((abs_pos, DelimiterType::Instruction)) => {
+                (abs_pos - pos, DelimiterType::Instruction, "{%", "%}")
+            }
+            Some((abs_pos, DelimiterType::Comment)) => {
+                (abs_pos - pos, DelimiterType::Comment, "{#", "#}")
+            }
         };
 
         let tag_start = pos + rel;
+
+        line += source[last_counted..tag_start]
+            .bytes()
+            .filter(|&b| b == b'\n')
+            .count();
+        last_counted = tag_start;
+
         tokens.push(Token::Static {
             text: &source[pos..tag_start],
         });
 
-        let line = line_at(source, tag_start);
         let after_opening = tag_start + opening.len();
 
         let (trim_left, content_start) = match source[after_opening..].strip_prefix('-') {

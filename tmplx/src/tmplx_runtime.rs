@@ -79,10 +79,9 @@ pub fn write_escaped_url(output: &mut String, value: &str) {
             continue;
         }
         output.push_str(&value[last..i]);
-        let mut enc = [b'%', 0, 0];
-        enc[1] = HEX_CHARS[(b >> 4) as usize];
-        enc[2] = HEX_CHARS[(b & 15) as usize];
-        output.push_str(unsafe { std::str::from_utf8_unchecked(&enc) });
+        output.push('%');
+        output.push(HEX_CHARS[(b >> 4) as usize] as char);
+        output.push(HEX_CHARS[(b & 15) as usize] as char);
         last = i + 1;
     }
     output.push_str(&value[last..]);
